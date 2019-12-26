@@ -86,7 +86,7 @@ export function appendParametersToURL(
   return url + '#' + parametersToString(parameters);
 }
 
-function parametersToString(parameters: ViewerParameters): string {
+export function parametersToString(parameters: ViewerParameters): string {
   const output = [];
   for (const key of Object.keys(parameters)) {
     // cast to 'any' to allow [] access

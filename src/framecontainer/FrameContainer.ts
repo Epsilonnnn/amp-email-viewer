@@ -1,5 +1,5 @@
 import { createIframe } from './createIframe';
-import { appendParametersToURL } from './viewerParameters';
+import { appendParametersToURL, parametersToString } from './viewerParameters';
 import * as viewerConfig from './viewerConfig';
 import { Messaging, RequestHandler } from '@ampproject/viewer-messaging';
 import {
@@ -7,6 +7,7 @@ import {
   ModuleInstance,
 } from './rendering-modules/index';
 import { Config } from '../config';
+import { IframeOptions } from './iframeOptions';
 
 /**
  * Creates an iframe that can render an AMP document, connects it with viewer
@@ -51,8 +52,12 @@ export class FrameContainer {
       this.unloadDocument();
     }
 
-    this.createViewerIframe();
-    await this.injectAMP(amp);
+    this.createViewerIframe(amp);
+
+    if (!this.config.useSrcDoc) {
+      await this.injectAMP(amp);
+    }
+
     this.startLoadingTimer();
     await this.startMessaging();
   }
@@ -135,15 +140,23 @@ export class FrameContainer {
     this.renderingModules = [];
   }
 
-  private createViewerIframe(): void {
-    this.iframe = createIframe(this.parent, {
-      src: this.getIframeSrc(),
+  private createViewerIframe(amp: string): void {
+    const iframeOptions:IframeOptions = {
       width: '100%',
       height: '1',
       featurePolicy: viewerConfig.IFRAME_FEATURE_POLICY,
       sandbox: this.getIframeSandbox(),
       styles: viewerConfig.IFRAME_STYLES,
-    });
+    };
+
+    if (this.config.useSrcDoc) {
+      iframeOptions.srcdoc = amp;
+      iframeOptions.name = this.getIframeName();
+    } else {
+      iframeOptions.src = this.getIframeSrc();
+    }
+
+    this.iframe = createIframe(this.parent, iframeOptions);
   }
 
   private async waitForIframeLoad(): Promise<void> {
@@ -217,14 +230,21 @@ export class FrameContainer {
   }
 
   private getIframeSrc(): string {
-    const params = Object.assign(
-      {
-        origin: window.location.origin,
-        messagingToken: this.messagingToken,
-      },
-      viewerConfig.VIEWER_PARAMETERS
+    return appendParametersToURL(this.config.relayPageURL, this.getIframeParameters());
+  }
+
+  private getIframeParameters() {
+    return Object.assign(
+        {
+          origin: window.location.origin,
+          messagingToken: this.messagingToken,
+        },
+        viewerConfig.VIEWER_PARAMETERS
     );
-    return appendParametersToURL(this.config.relayPageURL, params);
+  }
+
+  private getIframeName() {
+    return '__AMP__' + parametersToString(this.getIframeParameters());
   }
 
   private generateMessagingToken(): string {

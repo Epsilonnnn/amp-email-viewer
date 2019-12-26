@@ -1,13 +1,4 @@
-interface IframeOptions {
-  src: string;
-
-  width?: string;
-  height?: string;
-  featurePolicy?: string[] | string;
-  sandbox?: string[] | null;
-  className?: string;
-  styles?: string[] | string;
-}
+import { IframeOptions } from './iframeOptions';
 
 /**
  * Creates an iframe element with the provided options that includes sandbox
@@ -41,7 +32,18 @@ export function createIframe(
   if (options.sandbox) {
     iframe.setAttribute('sandbox', stringIfArray(options.sandbox, ' '));
   }
-  iframe.src = options.src;
+
+  if (options.src) {
+    iframe.src = options.src || '';
+  }
+
+  if (options.srcdoc) {
+    iframe.setAttribute('srcdoc', options.srcdoc);
+  }
+
+  if (options.name) {
+    iframe.name = options.name;
+  }
 
   parent.prepend(iframe);
 

@@ -18,9 +18,10 @@ window.ampCode =
 
 const container = document.querySelector('#viewer');
 const viewer = new FrameContainer(container, {
-  relayPageURL: process.env.CONFIG_RELAY_PAGE_URL,
+  relayPageURL: /*process.env.CONFIG_RELAY_PAGE_URL,*/ 'about:srcdoc',
   useOpaqueOrigin: Boolean(process.env.CONFIG_USE_OPAQUE_ORIGIN),
   imageProxyURL: process.env.CONFIG_IMAGE_PROXY_URL,
   loadTimeout: 3000,
+  useSrcDoc: true
 });
 viewer.render(window.ampCode);

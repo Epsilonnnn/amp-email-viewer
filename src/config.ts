@@ -14,6 +14,11 @@ export interface Config {
   useOpaqueOrigin: boolean;
 
   /**
+   * Whether to use srcdoc attribute
+   */
+  useSrcDoc?: boolean;
+
+  /**
    * URL of the image proxy. If unset, images are not proxied.
    */
   imageProxyURL?: string;
