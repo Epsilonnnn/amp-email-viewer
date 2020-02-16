@@ -24,6 +24,7 @@ export class FrameContainer {
   private messaging: Messaging | null = null;
   private renderingModules: ModuleInstance[] = [];
   private documentLoadResolver: (() => void) | null = null;
+  private messageHandlers: { [key: string]: RequestHandler } = {};
 
   /**
    * @param {!HTMLElement} parent Element to create an iframe inside of
@@ -132,6 +133,10 @@ export class FrameContainer {
     this.enabledRenderingModules.delete(module);
   }
 
+  registerMessageHandler(messageName: string, handler: RequestHandler) {
+    this.messageHandlers[messageName] = handler;
+  }
+
   private unloadDocument() {
     this.messaging = null;
     for (const module of this.renderingModules) {
@@ -194,6 +199,11 @@ export class FrameContainer {
     this.messaging = messaging;
     this.messaging.setDefaultHandler(this.messageHandler);
     this.messaging.registerHandler('documentLoaded', this.documentLoaded);
+
+    Object.keys(this.messageHandlers).forEach((messageName: string) => {
+      this.messaging?.registerHandler(messageName, this.messageHandlers[messageName]);
+    });
+
     this.loadRenderingModules();
     this.messaging.sendRequest('visibilitychange', {}, true);
   }
