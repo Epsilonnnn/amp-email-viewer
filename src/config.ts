@@ -69,6 +69,16 @@ export interface Config {
    * have.
    */
   maximumAMPSize?: number;
+
+  /**
+   * If set, then will be called when loading timeout have passed
+   */
+  onLoadError?: (err: object) => void;
+
+  /**
+   * If set, then will be called when loading completed
+   */
+  onLoadSuccess?: () => void;
 }
 
 // tslint:disable:no-any

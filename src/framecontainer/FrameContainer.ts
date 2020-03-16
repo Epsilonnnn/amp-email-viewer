@@ -184,6 +184,9 @@ export class FrameContainer {
         }
       });
     } catch (e) {
+      if (this.config.onLoadError) {
+        this.config.onLoadError(e);
+      }
       this.reportError('Loading timeout');
     }
   }
@@ -226,6 +229,11 @@ export class FrameContainer {
       this.documentLoadResolver();
       this.documentLoadResolver = null;
     }
+
+    if (this.config.onLoadSuccess) {
+      this.config.onLoadSuccess();
+    }
+
     for (const module of this.renderingModules) {
       module.documentLoaded();
     }
