@@ -44,9 +44,10 @@ export class FrameContainer {
    * Renders the provided AMP code inside the frame container.
    *
    * @param {string} amp AMP code to display
+   * @param {object} options
    * @return {!Promise} Resolves when rendered
    */
-  async render(amp: string): Promise<void> {
+  async render(amp: string, options: { onRenderSuccess?: (() => void), onRenderError?: ((e: object) => void) }): Promise<void> {
     if (this.iframe) {
       this.parent.removeChild(this.iframe);
       this.iframe = null;
@@ -59,7 +60,7 @@ export class FrameContainer {
       await this.injectAMP(amp);
     }
 
-    this.startLoadingTimer();
+    this.startLoadingTimer(options.onRenderSuccess, options.onRenderError);
     await this.startMessaging();
   }
 
@@ -175,7 +176,7 @@ export class FrameContainer {
     this.iframe!.contentWindow!.postMessage({ amp }, '*');
   }
 
-  private async startLoadingTimer() {
+  private async startLoadingTimer(onRenderSuccess?: (() => void), onRenderError?: ((e: object) => void)) {
     try {
       await new Promise((resolve, reject) => {
         this.documentLoadResolver = resolve;
@@ -183,9 +184,13 @@ export class FrameContainer {
           setTimeout(() => reject(), this.config.loadTimeout);
         }
       });
+
+      if (onRenderSuccess) {
+        onRenderSuccess();
+      }
     } catch (e) {
-      if (this.config.onLoadError) {
-        this.config.onLoadError(e);
+      if (onRenderError) {
+        onRenderError(e);
       }
       this.reportError('Loading timeout');
     }
@@ -228,10 +233,6 @@ export class FrameContainer {
     if (this.documentLoadResolver) {
       this.documentLoadResolver();
       this.documentLoadResolver = null;
-    }
-
-    if (this.config.onLoadSuccess) {
-      this.config.onLoadSuccess();
     }
 
     for (const module of this.renderingModules) {
