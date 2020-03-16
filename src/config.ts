@@ -69,6 +69,11 @@ export interface Config {
    * have.
    */
   maximumAMPSize?: number;
+
+  /**
+   * If set, all unhandled messages from amp iframe will be printed to console
+   */
+  verboseMessages?: boolean;
 }
 
 // tslint:disable:no-any

@@ -225,7 +225,10 @@ export class FrameContainer {
   }
 
   private messageHandler = (name: string, data: {}, rsvp: boolean) => {
-    console.log(`Received message: ${name} ${JSON.stringify(data)}`);
+    if (this.config.verboseMessages) {
+      console.log(`Received message: ${name} ${JSON.stringify(data)}`);
+    }
+
     return Promise.resolve();
   };
 
