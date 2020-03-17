@@ -62,6 +62,27 @@ export class FrameContainer {
 
     this.startLoadingTimer(options.onRenderSuccess, options.onRenderError);
     await this.startMessaging();
+
+    this.setIframeConnected();
+  }
+
+  async reinitialize(): Promise<void> {
+    this.iframe = this.parent.querySelector('iframe');
+
+    if (!this.iframe || this.isIframeConnected()) {
+      return;
+    }
+
+    await this.startMessaging();
+    this.setIframeConnected();
+  }
+
+  private setIframeConnected(): void {
+    this.iframe?.setAttribute('data-connected', 'true');
+  }
+
+  isIframeConnected(): boolean {
+    return Boolean(this.iframe?.dataset.connected);
   }
 
   /**
