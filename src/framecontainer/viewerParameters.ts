@@ -102,3 +102,14 @@ export function parametersToString(parameters: ViewerParameters): string {
   }
   return output.join('&');
 }
+
+export function stringToParameters(parametersString: string): { [ key: string ]: string } {
+  const paramsPairs = parametersString.split('&');
+  const params: { [ key: string ]: string } = {};
+
+  for (const pair of paramsPairs) {
+    params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+  }
+
+  return params;
+}

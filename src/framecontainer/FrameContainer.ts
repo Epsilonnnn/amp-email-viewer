@@ -1,5 +1,5 @@
 import { createIframe } from './createIframe';
-import { appendParametersToURL, parametersToString } from './viewerParameters';
+import { appendParametersToURL, parametersToString, stringToParameters } from './viewerParameters';
 import * as viewerConfig from './viewerConfig';
 import { Messaging, RequestHandler } from '@ampproject/viewer-messaging';
 import {
@@ -65,12 +65,23 @@ export class FrameContainer {
   }
 
   async reinitialize(): Promise<void> {
-    this.iframe = this.parent.querySelector('iframe');
+    const currentIframe = this.parent.querySelector('iframe');
 
-    if (!this.iframe) {
+    if (!currentIframe) {
       return;
     }
 
+    const amp = currentIframe.getAttribute('srcdoc') || '';
+
+    this.parent.removeChild(currentIframe);
+    this.createViewerIframe(amp);
+
+    // const iframeParams = this.getParametersFromIframeName();
+    // iframeParams.messagingToken = this.messagingToken;
+
+    // this.iframe.name = this.getIframeName();
+
+    this.startLoadingTimer();
     await this.startMessaging();
   }
 
@@ -277,6 +288,13 @@ export class FrameContainer {
 
   private getIframeName() {
     return '__AMP__' + parametersToString(this.getIframeParameters());
+  }
+
+  private getParametersFromIframeName() : { [ key: string ]: string } {
+    const name = this.iframe?.name;
+
+    const parametersString = name?.slice(7);
+    return stringToParameters(parametersString || '');
   }
 
   private generateMessagingToken(): string {
