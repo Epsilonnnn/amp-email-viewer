@@ -74,6 +74,11 @@ export interface Config {
    * If set, all unhandled messages from amp iframe will be printed to console
    */
   verboseMessages?: boolean;
+
+  /**
+   * If set, then will be called, when height changed
+   */
+  onHeightChange?: (height: string) => void
 }
 
 // tslint:disable:no-any

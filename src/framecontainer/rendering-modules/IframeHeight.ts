@@ -8,10 +8,12 @@ import { Messaging } from '@ampproject/viewer-messaging';
 class IframeHeightImpl {
   private iframe: HTMLIFrameElement;
   private messaging: Messaging;
+  private onHeightChange: ((height: string) => void) | undefined;
 
   constructor(frameContainer: FrameContainer) {
     this.iframe = frameContainer.getIframe();
     this.messaging = frameContainer.getMessaging();
+    this.onHeightChange = frameContainer.getConfig().onHeightChange;
   }
 
   start(): void {
@@ -26,8 +28,15 @@ class IframeHeightImpl {
     data: { height: number },
     rsvp: boolean
   ): Promise<void> => {
-    this.iframe.setAttribute('height', String(data.height));
-    return Promise.resolve();
+    const height = String(data.height);
+
+    this.iframe.setAttribute('height', height);
+
+    return Promise.resolve().then(() => {
+      if (this.onHeightChange) {
+        this.onHeightChange(height);
+      }
+    });
   };
 
   documentLoaded(): void {}
